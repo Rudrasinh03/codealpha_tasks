@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Chatbot - Online Shopping Assistance</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f9fafb;
+            --text-color: #111827;
+            --light-text: #6b7280;
+            --border-color: #e5e7eb;
+            --bot-bubble: #f3f4f6;
+            --user-bubble: var(--primary-color);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .faq-sidebar {
+            width: 300px;
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-bubble);
+            color: white;
+            border-top-right-radius: 0.25rem;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-bubble);
+            border-top-left-radius: 0.25rem;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background-color: white;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0 1.25rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        #send-btn:hover {
+            background-color: #4338ca;
+        }
+
+        .faq-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .faq-item {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-answer {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-text);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                opacity: 0.4;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-4px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .faq-sidebar {
+                position: absolute;
+                z-index: 10;
+                height: calc(100vh - 60px);
+            }
+
+            .sidebar-hidden {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Animation for new messages */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6fe60df5-4a2b-4a4d-b05a-488ff7d1193d.png" alt="Shopping cart icon with purple gradient background" class="logo-icon" />
+            <span>Shopping Helper</span>
+        </div>
+        <button class="faq-toggle" id="faq-toggle">
+            <span>View FAQs</span>
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="faq-sidebar" id="faq-sidebar">
+            <h3>Frequently Asked Questions</h3>
+            <div id="faq-list">
+                <!-- FAQ items will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    Hello! I'm your online shopping assistant. Ask me any questions about shipping, returns, payments, or order tracking.
+                </div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type your question here..." autocomplete="off">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FAQ Dataset
+        const faqs = [
+            {
+                question: "What payment methods do you accept?",
+                answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and Apple Pay. We also support select bank transfers in certain regions."
+            },
+            {
+                question: "How long does shipping take?",
+                answer: "Standard shipping typically takes 3-5 business days within the country. International shipping may take 7-14 business days depending on the destination. Expedited shipping options are available at checkout."
+            },
+            {
+                question: "Can I return an item if I don't like it?",
+                answer: "Yes, we offer a 30-day return policy. Items must be unused, in original packaging with tags attached. Please initiate the return process through your account page and include the original receipt."
+            },
+            {
+                question: "How can I track my order?",
+                answer: "Once your order ships, you'll receive a tracking number via email. You can enter this number on our Tracking page or click the link in your email to see real-time updates."
+            },
+            {
+                question: "Do you offer discounts for bulk orders?",
+                answer: "Yes, we provide volume discounts for orders over 50 units. Please contact our sales team at bulk@example.com for a custom quote and to discuss your specific needs."
+            },
+            {
+                question: "What are your customer service hours?",
+                answer: "Our customer service team is available Monday-Friday from 9AM to 6PM EST, and Saturday from 10AM to 4PM EST. You can reach us by phone at (800) 555-1234 or through live chat on our website."
+            },
+            {
+                question: "How do I change my shipping address?",
+                answer: "You can update your shipping address in your account settings. For orders that have already shipped, please contact customer service immediately as address changes may not be possible after processing begins."
+            },
+            {
+                question: "Is there shipping on weekends?",
+                answer: "Our warehouse operates Monday-Friday. Orders placed after 3PM Friday will ship on Monday. However, some carriers may deliver packages on Saturdays depending on the service level selected."
+            },
+            {
+                question: "What should I do if my package is damaged?",
+                answer: "Please take photos of the damaged package and contents, then contact our customer service within 7 days of delivery. We'll either send a replacement or issue a refund, depending on product availability."
+            },
+            {
+                question: "Do you ship internationally?",
+                answer: "Yes, we ship to most countries worldwide. International shipping rates and delivery times vary by destination. Duties and taxes may apply upon delivery depending on your country's regulations."
+            },
+            {
+                question: "How do I use a promo code?",
+                answer: "Enter your promo code in the designated field at checkout and click 'Apply'. The discount will be reflected in your order total before payment. Promo codes must be applied before completing your purchase."
+            },
+            {
+                question: "Where are your products made?",
+                answer: "Our products are sourced from various locations globally. Each product page includes detailed information about its country of origin. We ensure all products meet our strict quality standards regardless of origin."
+            }
+        ];
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const faqToggle = document.getElementById('faq-toggle');
+        const faqSidebar = document.getElementById('faq-sidebar');
+        const faqList = document.getElementById('faq-list');
+
+        // Initialize FAQ sidebar
+        function initFAQ() {
+            faqList.innerHTML = '';
+            faqs.forEach((item, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.innerHTML = `
+                    <div class="faq-question">${item.question}</div>
+                    <div class="faq-answer">${item.answer}</div>
+                `;
+                faqItem.addEventListener('click', () => {
+                    sendMessage(item.question, true);
+                });
+                faqList.appendChild(faqItem);
+            });
+        }
+
+        // Text processing utilities
+        function processText(text) {
+            // Convert to lowercase
+            text = text.toLowerCase();
+            
+            // Remove punctuation
+            text = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+            
+            // Split into words (tokenize)
+            const words = text.split(/\s+/);
+            
+            // Remove stopwords (simplified list for this demo)
+            const stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 
+                              'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 
+                              'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 
+                              'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 
+                              'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 
+                              'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 
+                              'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 
+                              'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 
+                              'with', 'about', 'against', 'between', 'into', 'through', 'during', 
+                              'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 
+                              'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 
+                              'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 
+                              'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 
+                              'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'can', 
+                              'will', 'just', 'should', 'now'];
+            
+            // Remove stopwords and return processed words
+            return words.filter(word => 
+                word.length > 2 && !stopwords.includes(word)
+            );
+        }
+
+        // Calculate similarity between two strings
+        function calculateSimilarity(text1, text2) {
+            // Process both texts
+            const words1 = processText(text1);
+            const words2 = processText(text2);
+            
+            // Create a set of all unique words
+            const allWords = [...new Set([...words1, ...words2])];
+            
+            // Create vectors
+            const vec1 = allWords.map(word => words1.includes(word) ? 1 : 0);
+            const vec2 = allWords.map(word => words2.includes(word) ? 1 : 0);
+            
+            // Calculate dot product
+            let dotProduct = 0;
+            for (let i = 0; i < allWords.length; i++) {
+                dotProduct += vec1[i] * vec2[i];
+            }
+            
+            // Calculate magnitudes
+            const mag1 = Math.sqrt(vec1.reduce((sum, val) => sum + val * val, 0));
+            const mag2 = Math.sqrt(vec2.reduce((sum, val) => sum + val * val, 0));
+            
+            if (mag1 === 0 || mag2 === 0) return 0;
+            
+            // Return cosine similarity
+            return dotProduct / (mag1 * mag2);
+        }
+
+        // Find the best matching FAQ
+        function findBestMatch(question) {
+            let bestMatch = null;
+            let highestScore = 0;
+            
+            faqs.forEach(item => {
+                const score = calculateSimilarity(question, item.question);
+                if (score > highestScore) {
+                    highestScore = score;
+                    bestMatch = item;
+                }
+            });
+            
+            return highestScore > 0.3 ? bestMatch : null;
+        }
+
+        // Display a typing indicator
+        function showTypingIndicator() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'message bot-message typing-indicator';
+            typingElement.id = 'typing-indicator';
+            typingElement.innerHTML = `
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            `;
+            chatMessages.appendChild(typingElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingElement;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            const typingElement = document.getElementById('typing-indicator');
+            if (typingElement) {
+                typingElement.remove();
+            }
+        }
+
+        // Add a message to the chat
+        function addMessage(text, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageElement.textContent = text;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle sending a message
+        function sendMessage(text, fromFAQ = false) {
+            if (!text.trim()) return;
+            
+            addMessage(text, !fromFAQ);
+            
+            if (!fromFAQ) {
+                userInput.value = '';
+            }
+            
+            // Show typing indicator
+            const typingElement = showTypingIndicator();
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                hideTypingIndicator();
+                
+                const bestMatch = findBestMatch(text);
+                if (bestMatch) {
+                    addMessage(bestMatch.answer);
+                } else {
+                    addMessage("I'm not sure I understand. Could you please rephrase your question? Here are some topics I can help with: payments, shipping, returns, or order tracking.");
+                }
+            }, 1500);
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', () => {
+            sendMessage(userInput.value);
+        });
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage(userInput.value);
+            }
+        });
+
+        faqToggle.addEventListener('click', () => {
+            faqSidebar.classList.toggle('sidebar-hidden');
+        });
+
+        // Initialize the app
+        initFAQ();
+
+        // Welcome message example responses
+        setTimeout(() => {
+            addMessage("Try asking me things like: 'What's your return policy?' or 'How do I track my order?'", false);
+        }, 1000);
+    </script>
+</body>
+</html>
+
