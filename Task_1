@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .result-box {
+            min-height: 150px;
+            transition: all 0.3s ease;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-3xl">
+        <div class="p-6">
+            <div class="flex items-center mb-6">
+                <div class="bg-purple-600 p-3 rounded-lg mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Translator</h1>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="sourceLang" class="block text-sm font-medium text-gray-700 mb-1">Source Language</label>
+                    <select id="sourceLang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ru">Russian</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ar">Arabic</option>
+                        <option value="ko">Korean</option>
+                        <option value="tr">Turkish</option>
+                        <option value="nl">Dutch</option>
+                        <option value="bn">Bengali</option>
+                        <option value="ta">Tamil</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="targetLang" class="block text-sm font-medium text-gray-700 mb-1">Target Language</label>
+                    <select id="targetLang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="hi">Hindi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="es">Spanish</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ru">Russian</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ar">Arabic</option>
+                        <option value="ko">Korean</option>
+                        <option value="tr">Turkish</option>
+                        <option value="nl">Dutch</option>
+                        <option value="bn">Bengali</option>
+                        <option value="ta">Tamil</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="sourceText" class="block text-sm font-medium text-gray-700 mb-1">Text to Translate</label>
+                <textarea id="sourceText" rows="4" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your text here..."></textarea>
+            </div>
+
+            <div class="flex space-x-2">
+                <button id="translateBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Translate
+                </button>
+                <button id="speechInputBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-8">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="translatedText" class="block text-sm font-medium text-gray-700">Translation Result</label>
+                    <div id="actionButtons" class="invisible flex space-x-2">
+                        <button id="copyBtn" class="text-purple-600 hover:text-purple-800 p-1 rounded-full hover:bg-purple-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                        <button id="speakBtn" class="text-purple-600 hover:text-purple-800 p-1 rounded-full hover:bg-purple-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="translatedText" class="result-box p-4 border border-gray-300 rounded-lg bg-gray-50"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const translateBtn = document.getElementById('translateBtn');
+            const sourceText = document.getElementById('sourceText');
+            const sourceLang = document.getElementById('sourceLang');
+            const targetLang = document.getElementById('targetLang');
+            const translatedText = document.getElementById('translatedText');
+            const copyBtn = document.getElementById('copyBtn');
+            const speakBtn = document.getElementById('speakBtn');
+            const actionButtons = document.getElementById('actionButtons');
+            const speechInputBtn = document.getElementById('speechInputBtn');
+
+            translateBtn.addEventListener('click', translateText);
+            speechInputBtn.addEventListener('click', startSpeechRecognition);
+            
+            // Hit enter in textarea to translate
+            sourceText.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.shiftKey === false) {
+                    e.preventDefault();
+                    translateText();
+                }
+            });
+
+            copyBtn.addEventListener('click', copyToClipboard);
+            speakBtn.addEventListener('click', textToSpeech);
+
+            function translateText() {
+                const text = sourceText.value.trim();
+                if (!text) {
+                    showError('Please enter text to translate');
+                    return;
+                }
+
+                const fromLang = sourceLang.value;
+                const toLang = targetLang.value;
+
+                translatedText.innerHTML = '<div class="pulse text-center text-gray-500">Translating...</div>';
+                translateBtn.disabled = true;
+                translateBtn.classList.add('opacity-70');
+
+                // Using MyMemory API (free translation service)
+                fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.responseStatus !== 200) {
+                            throw new Error('Translation API error');
+                        }
+                        
+                        if (data.responseData) {
+                            displayTranslation(data.responseData.translatedText);
+                        } else {
+                            throw new Error('No translation found');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Translation error:', error);
+                        showError('Translation failed. Please try again.');
+                    })
+                    .finally(() => {
+                        translateBtn.disabled = false;
+                        translateBtn.classList.remove('opacity-70');
+                    });
+            }
+
+            function displayTranslation(text) {
+                translatedText.textContent = text;
+                translatedText.classList.add('bg-green-50');
+                setTimeout(() => translatedText.classList.remove('bg-green-50'), 500);
+                actionButtons.classList.remove('invisible');
+            }
+
+            function showError(message) {
+                translatedText.innerHTML = `<div class="text-red-500">${message}</div>`;
+                translatedText.classList.add('bg-red-50');
+                setTimeout(() => translatedText.classList.remove('bg-red-50'), 500);
+            }
+
+            function copyToClipboard() {
+                const text = translatedText.textContent;
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>`;
+                        setTimeout(() => {
+                            copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>`;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Copy failed:', err);
+                    });
+            }
+
+            function textToSpeech() {
+                const text = translatedText.textContent;
+                const lang = targetLang.value;
+                
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = lang;
+                    utterance.rate = 0.9;
+                    speechSynthesis.speak(utterance);
+                    
+                    // Visual feedback
+                    speakBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>`;
+                    
+                    utterance.onend = function() {
+                        speakBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>`;
+                    };
+                } else {
+                    showError('Text-to-speech not supported in your browser');
+                }
+            }
+
+            function startSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window) {
+                    const recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = sourceLang.value;
+                    
+                    speechInputBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>`;
+                    
+                    recognition.onresult = function(event) {
+                        const transcript = event.results[0][0].transcript;
+                        sourceText.value = transcript;
+                        speechInputBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>`;
+                    };
+                    
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error', event.error);
+                        speechInputBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>`;
+                    };
+                    
+                    recognition.start();
+                } else {
+                    alert('Speech recognition not supported in this browser');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
